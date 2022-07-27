@@ -4,8 +4,10 @@ import java.io.IOException;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.util.Base64;
 
 import br.com.faguiar.brasileiraorestapi.dto.PartidaGoogleDTO;
 
@@ -33,7 +35,14 @@ public class ScrapingUtil {
 			String title = document.title();
 			LOGGER.info("titulo da pagina: {}", title);
 			StatusPartida statusPartida = obterStatusPartida(document);
-			obterTempoPartida(document);
+			if (statusPartida != StatusPartida.PARTIDA_NAO_INICIADA) {
+				String tempoPartida = obterTempoPartida(document);
+				
+			}
+			String timeCasa = obterNomeEquipeCasa(document);
+			String timeVisitante = obterNomeEquipeVisitante(document);
+			String logoCasa = obterLogoEquipeCasa(document);
+			String logoVisitante = obterLogoEquipeVisitante(document);
 			
 		} catch (IOException e) {
 			LOGGER.error("ERRO AO TENTAR CONECTAR NO GOOGLE COM JSOUP : {}", e.getMessage());
@@ -89,5 +98,41 @@ public class ScrapingUtil {
 		LOGGER.info("tempo partida : {}", tempoPartida);
 		return tempoPartida;
 	}
+	
+	public String obterNomeEquipeCasa(Document document) {
+		String equipeCasa = null;
+		Element element = document.selectFirst("div[class=imso_mh__first-tn-ed imso_mh__tnal-cont imso-tnol]");
+		equipeCasa = element.select("span").text();
+		LOGGER.info("time da casa : {}", equipeCasa);
+		return equipeCasa;
+	}
+	
+	
+	public String obterNomeEquipeVisitante(Document document) {
+		String equipeVisitante = null;
+		Element element = document.selectFirst("div[class=imso_mh__second-tn-ed imso_mh__tnal-cont imso-tnol]");
+		equipeVisitante = element.select("span").text();
+		LOGGER.info("time da visitante : {}", equipeVisitante);
+		return equipeVisitante;
+	}
+	
+	public String obterLogoEquipeCasa(Document document) {
+		String logo = null;
+		Element element = document.selectFirst("div[class=imso_mh__first-tn-ed imso_mh__tnal-cont imso-tnol]");
+		logo = element.select("img[class=imso_btl__mh-logo]").attr("src");
+		LOGGER.info("2.Logo equipe casa : {}", logo);
+		return logo;
+	}
 
+	public String obterLogoEquipeVisitante(Document document) {
+		String logo = null;
+		Element element = document.selectFirst("div[class=imso_mh__second-tn-ed imso_mh__tnal-cont imso-tnol]");
+		logo = element.select("img[class=imso_btl__mh-logo]").attr("src");
+		LOGGER.info("2.Logo equipe visitante : {}", logo);
+		System.out.println(element.select("img[class=imso_btl__mh-logo]").hasAttr("src"));
+		return logo;
+	}
+	
+	
+	//"" currentSrc
 }
