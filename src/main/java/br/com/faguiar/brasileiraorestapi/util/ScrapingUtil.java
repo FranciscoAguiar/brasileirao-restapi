@@ -5,9 +5,12 @@ import java.io.IOException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.util.Base64;
+
+import java.util.*;
+
 
 import br.com.faguiar.brasileiraorestapi.dto.PartidaGoogleDTO;
 
@@ -43,6 +46,10 @@ public class ScrapingUtil {
 			String timeVisitante = obterNomeEquipeVisitante(document);
 			String logoCasa = obterLogoEquipeCasa(document);
 			String logoVisitante = obterLogoEquipeVisitante(document);
+			Integer placarEquipeCasa = obterPlacarTimeCasa(document);
+			Integer placarEquipeVisitante = obterPlacarTimeVisitante(document);
+			String golsEquipeCasa = obterGolsEquipeCasa(document);
+			String golsEquipeVisitante = obterGolsEquipeVisitante(document);
 			
 		} catch (IOException e) {
 			LOGGER.error("ERRO AO TENTAR CONECTAR NO GOOGLE COM JSOUP : {}", e.getMessage());
@@ -120,6 +127,7 @@ public class ScrapingUtil {
 		String logo = null;
 		Element element = document.selectFirst("div[class=imso_mh__first-tn-ed imso_mh__tnal-cont imso-tnol]");
 		logo = element.select("img[class=imso_btl__mh-logo]").attr("src");
+		
 		LOGGER.info("2.Logo equipe casa : {}", logo);
 		return logo;
 	}
@@ -133,6 +141,47 @@ public class ScrapingUtil {
 		return logo;
 	}
 	
+	public Integer obterPlacarTimeCasa(Document document) {
+		Integer placar = null;
+		String placarEquipe = document.selectFirst("div[class=imso_mh__l-tm-sc imso_mh__scr-it imso-light-font]").text();
+		placar = Integer.valueOf(placarEquipe);
+		LOGGER.info("3.obterPlacarTimeCasa : {}", placar);
+		return placar;
+		
+	}
 	
-	//"" currentSrc
+	public Integer obterPlacarTimeVisitante(Document document) {
+		Integer placar = null;
+		String placarEquipe = document.selectFirst("div[class=imso_mh__r-tm-sc imso_mh__scr-it imso-light-font]").text();
+		placar = Integer.valueOf(placarEquipe);
+		LOGGER.info("3.obterPlacarTimeVisitante : {}", placar);
+		return placar;
+		
+	}
+	
+	public String obterGolsEquipeCasa(Document document) {
+		String jogador = null;
+		List<String> golsEquipe = new ArrayList<>();
+		Elements elementos = document.select("div[class=imso_gs__tgs imso_gs__left-team]").select("div[class=imso_gs__gs-r]");
+		for(Element e: elementos) {
+			String infoGol = e.select("div[class=imso_gs__gs-r]").text();
+			golsEquipe.add(infoGol);
+		}
+		jogador = String.join(", ", golsEquipe);
+		LOGGER.info("4.obterGolsEquipeCasa : {}", jogador);
+		return jogador;
+	}
+	
+	public String obterGolsEquipeVisitante(Document document) {
+		String jogador = null;
+		List<String> golsEquipe = new ArrayList<>();
+		Elements elementos = document.select("div[class=imso_gs__tgs imso_gs__right-team]").select("div[class=imso_gs__gs-r]");
+		for(Element e: elementos) {
+			String infoGol = e.select("div[class=imso_gs__gs-r]").text();
+			golsEquipe.add(infoGol);
+		}
+		jogador = String.join(", ", golsEquipe);
+		LOGGER.info("4.obterGolsEquipeVisitante : {}", jogador);
+		return jogador;
+	}
 }
