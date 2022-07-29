@@ -19,6 +19,10 @@ public class ScrapingUtil {
 	private static final String BASE_URL_GOOGLE = "https://www.google.com/search?q=";
 	private static final String COMPLEMENTO_URL_GOOGLE = "&hl=pt-BR";
 	
+	private static String CASA = "Casa";
+	private static String VISITANTE = "Visitante";
+	
+	
 	public static void main(String[] args) {
 		String url = BASE_URL_GOOGLE + "fluminense+x+bragantino" + COMPLEMENTO_URL_GOOGLE;
 		
@@ -50,6 +54,11 @@ public class ScrapingUtil {
 			Integer placarEquipeVisitante = obterPlacarTimeVisitante(document);
 			String golsEquipeCasa = obterGolsEquipeCasa(document);
 			String golsEquipeVisitante = obterGolsEquipeVisitante(document);
+			Integer penalidadesCasa =  obterPenalidades(document, CASA);
+			LOGGER.info("penalidadesCasa: {}", penalidadesCasa);
+			Integer penalidadesVistante =  obterPenalidades(document, VISITANTE);
+			LOGGER.info("penalidadesVistante: {}", penalidadesVistante);
+			
 			
 		} catch (IOException e) {
 			LOGGER.error("ERRO AO TENTAR CONECTAR NO GOOGLE COM JSOUP : {}", e.getMessage());
@@ -183,5 +192,32 @@ public class ScrapingUtil {
 		jogador = String.join(", ", golsEquipe);
 		LOGGER.info("4.obterGolsEquipeVisitante : {}", jogador);
 		return jogador;
+	}
+	
+	public Integer obterPenalidades(Document document, String tipoEquipe) {
+		Integer placar = null;
+		String[] divisao = null;
+		boolean isPenalidades = document.select("div[class=imso_mh_s__psn-sc]").isEmpty();
+		if (!isPenalidades) {
+			String penalidades = document.select("div[class=imso_mh_s__psn-sc]").text();
+			String penalidadesCompleta = penalidades.substring(0,5).replace(" ", "");
+			divisao = penalidadesCompleta.split("-");
+			LOGGER.info("5.obterPenalidades : {}", penalidadesCompleta);
+			return tipoEquipe.equals(CASA) ? formataPlacarInteger(divisao[0]) : formataPlacarInteger(divisao[1]);
+			
+			
+		}
+		
+		return null;
+	}
+	
+	public Integer formataPlacarInteger(String placar) {
+		Integer valor ;
+		try {
+			valor = Integer.parseInt(placar);
+		}catch (Exception e) {
+			valor = 0;
+		}
+		return valor;
 	}
 }
